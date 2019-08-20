@@ -1,0 +1,11 @@
+---
+# defaults file for add_filesystems
+
+default_filesystem: 'xfs'
+default_vg_devices: '/dev/sdb1'
+default_partition_number: '1'
+default_mount_options: []
+default_partition_flags: []
+default_undefined_mount_point_msg: 'not mounted nor configured in /etc/fstab'
+
+...

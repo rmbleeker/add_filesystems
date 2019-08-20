@@ -1,0 +1,66 @@
+---
+# tasks file for add_filesystems
+
+- name: partition {{ disk.device }}
+  parted:
+    state: present
+    device: "{{ disk.device }}"
+    label: "{{ disk.label | default(omit) }}"
+    number: "{{ part.number | default(default_partition_number)}}"
+    name: "{{ part.name | default(omit) }}"
+    flags: "{{ part.flags | default(default_partition_flags) }}"
+    part_start: "{{ part.start | default(omit) }}"
+    part_end: "{{ part.end | default(omit) }}"
+  loop: "{{ disk.partitions | default([default_partition_number]) }}"
+  loop_control:
+    loop_var: part
+    label: "{{ disk.device }}{{ part.number | default(default_partition_number) }}"
+
+- name: create filesystem
+  filesystem:
+    fstype: "{{ part.fstype | default(default_filesystem) }}"
+    dev: "{{ disk.device }}{{ part.number | default(default_partition_number) }}"
+  loop: "{{ disk.partitions }}"
+  loop_control:
+    loop_var: part
+    label: "{{ disk.device }}{{ part.number | default(default_partition_number) }} => {{ part.fstype | default(default_filesystem) }}"
+  when:
+    - disk.partitions is defined
+    - part.fstype is defined or part.mount_point is defined
+
+- name: mount filesystem
+  block:
+    - name: mount filesystem and configure fstab
+      mount:
+        path: "{{ part.mount_point }}"
+        src: "{{ disk.device }}{{ part.number | default(default_partition_number) }}"
+        fstype: "{{ part.fstype | default(default_filesystem) }}"
+        state: mounted
+        opts: "{{ part.mount_options | default(default_mount_options) | join(',') or omit }}"
+      loop: "{{ disk.partitions }}"
+      loop_control:
+        loop_var: part
+        index_var: index
+        label: "{{ disk.device }}{{ part.number | default(default_partition_number) }} => {{ part.mount_point | default(default_undefined_mount_point_msg) }}"
+      when:
+        - disk.partitions is defined
+        - part.mount_point is defined
+  rescue:
+    - name: remove unmountable filesystem from fstab
+      mount:
+        path: "{{ part.mount_point }}"
+        src: "{{ disk.device }}{{ part.number | default(default_partition_number) }}"
+        fstype: "{{ part.fstype | default(default_filesystem) }}"
+        state: absent
+        opts: "{{ part.mount_options | default(default_mount_options) | join(',') or omit }}"
+      loop: "{{ disk.partitions }}"
+      loop_control:
+        loop_var: part
+        index_var: index
+        label: "{{ disk.device }}{{ part.number | default(default_partition_number) }} => {{ part.mount_point | default(default_undefined_mount_point_msg) }}"
+      when:
+        - disk.partitions is defined
+        - part.mount_point is defined
+        - ansible_failed_result.results[index].failed
+
+...

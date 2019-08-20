@@ -1,0 +1,69 @@
+---
+# tasks file for add_filesystems
+
+- name: create volume group {{ vol_grp.name }}
+  lvg:
+    vg: "{{ vol_grp.name }}"
+    pvs: "{{ vol_grp.devices | default(default_vg_devices) | join(',') }}"
+
+- name: create logical volume
+  lvol:
+    vg: "{{ vol_grp.name }}"
+    lv: "{{ log_vol.name }}"
+    size: "{{ log_vol.size }}"
+    shrink: yes
+    resizefs: yes
+  loop: "{{ vol_grp.lv }}"
+  loop_control:
+    loop_var: log_vol
+    label: "{{ vol_grp.name }}/{{ log_vol.name }}"
+  when:
+    - vol_grp.lv is defined
+
+- name: create filesystem
+  filesystem:
+    fstype: "{{ log_vol.fstype | default(default_filesystem) }}"
+    dev: "/dev/mapper/{{ vol_grp.name }}-{{ log_vol.name }}"
+  loop: "{{ vol_grp.lv }}"
+  loop_control:
+    loop_var: log_vol
+    label: "{{ vol_grp.name }}/{{ log_vol.name }} => {{ log_vol.fstype | default(default_filesystem) }}"
+  when:
+    - vol_grp.lv is defined
+
+- name: mount filesystem
+  block:
+    - name: mount filesystem and configure fstab
+      mount:
+        path: "{{ log_vol.mount_point }}"
+        src: "/dev/mapper/{{ vol_grp.name }}-{{ log_vol.name }}"
+        fstype: "{{ log_vol.fstype | default(default_filesystem) }}"
+        state: mounted
+        opts: "{{ log_vol.mount_options | default(default_mount_options) | join(',') or omit }}"
+      loop: "{{ vol_grp.lv }}"
+      loop_control:
+        loop_var: log_vol
+        index_var: index
+        label: "{{ vol_grp.name }}/{{ log_vol.name }} => {{ log_vol.mount_point | default(default_undefined_mount_point_msg) }}"
+      when:
+        - vol_grp.lv is defined
+        - log_vol.mount_point is defined
+  rescue:
+    - name: remove unmountable filesystem from fstab
+      mount:
+        path: "{{ log_vol.mount_point }}"
+        src: "/dev/mapper/{{ vol_grp.name }}-{{ log_vol.name }}"
+        fstype: "{{ log_vol.fstype | default(default_filesystem) }}"
+        state: absent
+        opts: "{{ log_vol.mount_options | default(default_mount_options) | join(',') or omit }}"
+      loop: "{{ vol_grp.lv }}"
+      loop_control:
+        loop_var: log_vol
+        index_var: index
+        label: "{{ vol_grp.name }}/{{ log_vol.name }} => {{ log_vol.mount_point | default(default_undefined_mount_point_msg) }}"
+      when:
+        - vol_grp.lv is defined
+        - log_vol.mount_point is defined
+        - ansible_failed_result.results[index].failed
+
+...

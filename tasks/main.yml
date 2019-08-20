@@ -1,0 +1,30 @@
+---
+# tasks file for add_filesystems
+
+- include_tasks:
+    file: partitions.yml
+    apply:
+      tags:
+        - partition
+  loop: "{{ disks }}"
+  loop_control:
+    loop_var: disk
+  when:
+    - disks is defined
+  tags:
+    - partition
+
+- include_tasks:
+    file: lvm.yml
+    apply:
+      tags:
+        - lvm
+  loop: "{{ vg }}"
+  loop_control:
+    loop_var: vol_grp
+  when:
+    - vg is defined
+  tags:
+    - lvm
+
+...
