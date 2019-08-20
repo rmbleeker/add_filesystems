@@ -13,6 +13,7 @@ role variables
 
 The following dictionaries are used by this role:
 
+```
 disks
   - device
     label (optional)
@@ -42,14 +43,17 @@ vg
           - list of mount options
   - name
     ...
+```
 
 If you do not want raw disks in your volume group (e.g. "vg.devices: /dev/sdb" instead of "vg.devices: /dev/sdb1"), specify
 at least the disk device. Parted will automatically create a single primary partition on that device using its full size.
 
 Example:
 
+```
 disks:
   - device: /dev/sdb
+```
 
 dependencies
 ------------
