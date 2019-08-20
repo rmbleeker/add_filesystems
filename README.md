@@ -1,5 +1,5 @@
 add_filesystems
-=========
+===============
 
 This role adds partitions, volume groups and logical volumes to a machine.
 
@@ -14,34 +14,34 @@ role variables
 The following dictionaries are used by this role:
 
 ```
-disks
-  - device
-    label (optional)
-    partitions
-      - number
-        name (required for GPT labeled partitions, defaults to the partition type "primary" if not used)
-        flags (optional)
-        start (optional)
-        end (optional)
-        fstype (do not define when using lvm)
-        mount_point (do not define when using lvm)
-        mount_options (optional)
+disks:
+  - device: /dev/sda
+    label: (optional)
+    partitions:
+      - number: 1
+        name: (required for GPT labeled partitions, defaults to the partition type "primary" if not used)
+        flags: (optional)
+        start: (optional)
+        end: (optional)
+        fstype: (do not define when using lvm)
+        mount_point: (do not define when using lvm)
+        mount_options: (optional)
           - list of mount options
-  - device
+  - device: /dev/sdb
     ...
 
-vg
-  - name
-    devices
+vg:
+  - name: vg_name
+    devices:
       - list of block devices
-    lv
-      - name
-        size
-        fstype
-        mount_point
-        mount_options (optional)
+    lv:
+      - name: lv_name
+        size:
+        fstype:
+        mount_point:
+        mount_options: (optional)
           - list of mount options
-  - name
+  - name: vg_name
     ...
 ```
 
