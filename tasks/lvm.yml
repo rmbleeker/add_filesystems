@@ -1,7 +1,7 @@
 ---
 # tasks file for add_filesystems
 
-- name: create volume group {{ vol_grp.name }}
+- name: "add {{ vol_grp.devices | default(default_vg_devices) | join(',') }} to volume group {{ vol_grp.name }}"
   lvg:
     vg: "{{ vol_grp.name }}"
     pvs: "{{ vol_grp.devices | default(default_vg_devices) | join(',') }}"
