@@ -48,6 +48,20 @@
       when:
         - vol_grp.lv is defined
         - log_vol.mount_point is defined
+    - name: set permissions on mount point
+      file:
+        path: "{{ log_vol.mount_point }}"
+        mode: "{{ log_vol.mode | default(omit) }}"
+        owner: "{{ log_vol.owner | default(omit) }}"
+        group: "{{ log_vol.group | default(omit) }}"
+        state: directory
+      loop: "{{ vol_grp.lv }}"
+      loop_control:
+        loop_var: log_vol
+        label: "{{ log_vol.mount_point | default(default_undefined_mount_point_msg) }} {{ log_vol.mode | default('-') }} {{ log_vol.owner | default('-') }} {{ log_vol.group | default('-') }}"
+      when:
+        - vol_grp.lv is defined
+        - log_vol.mount_point is defined
   rescue:
     - name: remove unmountable filesystem from fstab
       mount:

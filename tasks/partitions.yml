@@ -45,6 +45,20 @@
       when:
         - disk.partitions is defined
         - part.mount_point is defined
+    - name: set permissions on mount point
+      file:
+        path: "{{ part.mount_point }}"
+        mode: "{{ part.mode | default(omit) }}"
+        owner: "{{ part.owner | default(omit) }}"
+        group: "{{ part.group | default(omit) }}"
+        state: directory
+      loop: "{{ disk.partitions }}"
+      loop_control:
+        loop_var: part
+        label: "{{ part.mount_point | default(default_undefined_mount_point_msg) }} {{ part.mode | default('-') }} {{ part.owner | default('-') }} {{ part.group | default('-') }}"
+      when:
+        - disk.partitions is defined
+        - part.mount_point is defined
   rescue:
     - name: remove unmountable filesystem from fstab
       mount:
