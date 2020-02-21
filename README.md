@@ -1,19 +1,16 @@
-add_filesystems
-===============
+# add_filesystems
 
 This role adds partitions, volume groups and logical volumes to a machine.
 
-requirements
-------------
+### requirements
 
 There are no additional requirements.
 
-role variables
---------------
+### role variables
 
 The following dictionaries are used by this role:
 
-```
+```yaml
 disks:
   - device: /dev/sda
     label: (optional)
@@ -27,6 +24,9 @@ disks:
         mount_point: (do not define when using lvm)
         mount_options: (optional)
           - list of mount options
+        owner: (optional, owner of the mount directory)
+        group: (optional, group of the mount directory)
+        mode: (optional, permissions of the mount directory)
   - device: /dev/sdb
     ...
 
@@ -50,22 +50,19 @@ at least the disk device. Parted will automatically create a single primary part
 
 Example:
 
-```
+```yaml
 disks:
   - device: /dev/sdb
 ```
 
-dependencies
-------------
+### dependencies
 
 none
 
-license
--------
+### license
 
 BSD
 
-author information
-------------------
+### author information
 
 ruud.bleeker@identiteitendiensten.nl
