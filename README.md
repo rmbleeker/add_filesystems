@@ -45,8 +45,8 @@ vg:
     ...
 ```
 
-If you do not want raw disks in your volume group (e.g. "vg.devices: /dev/sdb" instead of "vg.devices: /dev/sdb1"), specify
-at least the disk device. Parted will automatically create a single primary partition on that device using its full size.
+If you do not want raw disks in your volume group (e.g. `vg.devices: /dev/sdb1` instead of `vg.devices: /dev/sdb`),
+specify the disk devices to be partitioned. A single primary partition will be createed on the device.
 
 Example:
 
