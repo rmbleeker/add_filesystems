@@ -65,4 +65,4 @@ BSD
 
 ### author information
 
-ruud.bleeker@identiteitendiensten.nl
+rbleeker@gmail.com
