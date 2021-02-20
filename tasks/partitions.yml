@@ -1,20 +1,29 @@
 ---
 # tasks file for add_filesystems
 
-- name: partition {{ disk.device }}
-  parted:
-    state: present
-    device: "{{ disk.device }}"
-    label: "{{ disk.label | default(omit) }}"
-    number: "{{ part.number | default(default_partition_number)}}"
-    name: "{{ part.name | default(omit) }}"
-    flags: "{{ part.flags | default(default_partition_flags) }}"
-    part_start: "{{ part.start | default(omit) }}"
-    part_end: "{{ part.end | default(omit) }}"
-  loop: "{{ disk.partitions | default([default_partition_number]) }}"
-  loop_control:
-    loop_var: part
-    label: "{{ disk.device }}{{ part.number | default(default_partition_number) }}"
+- name: create partitions
+  block:
+    - name: partition {{ disk.device }}
+      parted:
+        state: present
+        device: "{{ disk.device }}"
+        label: "{{ disk.label | default(omit) }}"
+        number: "{{ part.number | default(default_partition_number)}}"
+        name: "{{ part.name | default(omit) }}"
+        flags: "{{ part.flags | default(default_partition_flags) }}"
+        part_start: "{{ part.start | default(omit) }}"
+        part_end: "{{ part.end | default(omit) }}"
+      loop: "{{ disk.partitions | default([default_partition_number]) }}"
+      loop_control:
+        loop_var: part
+        label: "{{ disk.device }}{{ part.number | default(default_partition_number) }}"
+  rescue:
+    - name: partition {{ disk }} as {{ disk }}{{ default_partition_number }}
+      parted:
+        state: present
+        device: "{{ disk }}"
+        number: "{{ default_partition_number }}"
+        flags: "{{ default_partition_flags }}"
 
 - name: create filesystem
   filesystem:
