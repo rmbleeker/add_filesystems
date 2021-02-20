@@ -23,7 +23,7 @@
 - name: create filesystem
   filesystem:
     fstype: "{{ log_vol.fstype | default(default_filesystem) }}"
-    dev: "/dev/mapper/{{ vol_grp.name }}-{{ log_vol.name }}"
+    dev: "/dev/{{ vol_grp.name }}/{{ log_vol.name }}"
   loop: "{{ vol_grp.lv }}"
   loop_control:
     loop_var: log_vol
@@ -36,7 +36,7 @@
     - name: mount filesystem and configure fstab
       mount:
         path: "{{ log_vol.mount_point }}"
-        src: "/dev/mapper/{{ vol_grp.name }}-{{ log_vol.name }}"
+        src: "/dev/{{ vol_grp.name }}/{{ log_vol.name }}"
         fstype: "{{ log_vol.fstype | default(default_filesystem) }}"
         state: mounted
         opts: "{{ log_vol.mount_options | default(default_mount_options) | join(',') or omit }}"
@@ -66,7 +66,7 @@
     - name: remove unmountable filesystem from fstab
       mount:
         path: "{{ log_vol.mount_point }}"
-        src: "/dev/mapper/{{ vol_grp.name }}-{{ log_vol.name }}"
+        src: "/dev/{{ vol_grp.name }}/{{ log_vol.name }}"
         fstype: "{{ log_vol.fstype | default(default_filesystem) }}"
         state: absent
         opts: "{{ log_vol.mount_options | default(default_mount_options) | join(',') or omit }}"
